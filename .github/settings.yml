@@ -66,7 +66,42 @@ settings:
           name: wontfix
           color: ffffff
           description: This will not be worked on
-    rulesets: []
+    rulesets:
+        - id: 26024001
+          name: default
+          target: branch
+          enforcement: active
+          conditions:
+            ref_name:
+                include:
+                    - ~DEFAULT_BRANCH
+                exclude: []
+          bypass_actors: []
+          rules:
+            - type: code_quality
+              parameters:
+                severity: errors
+            - type: code_scanning
+              parameters:
+                code_scanning_tools:
+                    - tool: CodeQL
+                      alerts_threshold: errors
+                      security_alerts_threshold: high_or_higher
+            - type: deletion
+            - type: non_fast_forward
+            - type: pull_request
+              parameters:
+                allowed_merge_methods:
+                    - squash
+                dismiss_stale_reviews_on_push: true
+                require_code_owner_review: true
+                require_extra_approval_for_unattributed_changes: true
+                require_last_push_approval: false
+                required_approving_review_count: 1
+                required_review_thread_resolution: true
+                required_reviewers: []
+            - type: required_linear_history
+            - type: required_signatures
     environments: []
     actions:
         fork_pr_approval_policy: first_time_contributors
