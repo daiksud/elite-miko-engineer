@@ -3,10 +3,15 @@
 
 ## Codexの自動承認とマージ保護
 
-[承認ワークフロー](.github/workflows/approve-codex-review.yml)は、現在のHEADに対する信頼できるCodexレビューを解釈し、そのコミットを承認します。BotとApp、コード・セキュリティレビューの完了、指摘、Codexの👍を確認します。セキュリティの指摘フラグがnullの場合は、同じHEADの種類別の最新の信頼できるreceiptと完全なSHAへの解決も必要です。送信直前に証跡、👍、open状態とHEADを再確認し、正確な `commit_id` で承認します。
+[承認ワークフロー](.github/workflows/approve-codex-review.yml)は、次の2条件を満たしたら承認します。
 
-同じHEADの完了結果と既存の👍は再利用できます。新しい依頼や時刻だけでは再レビューを要求しません。編集・再利用された証跡の時刻による検知や、レビュー対象baseの証明は行いません。workflowの成功には承認保留も含まれ、承認とマージ可能性は別です。
+1. PRにCodexの👍がある。
+2. 最新のCodex Review SummaryでCode ReviewとSecurity Reviewが両方ともCompletedである。
 
-承認の失効や必須チェック、必要なbase同期はRulesetsの責務です。2026-11-01に読み取った [default Ruleset](https://github.com/daiksud/elite-miko-engineer/rules/26024001) は `main` に対して有効で、`dismiss_stale_reviews_on_push: true` でした。ただし、`required_status_checks` のルールはありません。このRulesetからbaseの最新化を要求しているとは確認できません。classicなbranch protectionは403で未確認であり、ほかの保護が存在しないとも断定しません。設定は変更せず、この不足の可能性を承認workflowで黙って補いません。
+GitHub APIの `user.login` でCodexを識別し、コメントIDが最も大きいSummaryのMarkdown表にある2つの状態欄だけを確認します。HEAD、base、時刻、receipt、指摘フラグ、過去の依頼や変更要求は承認条件にしません。承認APIの対象コミットは `commit_id` を指定せずGitHubに任せます。構造化メタデータも不要です。送信直前にも同じ2条件だけを再確認し、コメント本文やリアクションIDが変わったこと自体は追加条件にしません。
 
-GitHubの[承認失効条件](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging)は、承認済み差分の変化やmerge baseから導入された変更に基づきます。HEADのSHA変更やmainの更新だけで必ず失効するという意味ではありません。[strictな必須チェック](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-status-checks-to-pass-before-merging)によるbase最新化は別のマージ条件です。workflowはbase履歴を追跡せず、承認の取り消しやマージを行いません。実際のマージ判断では有効な保護とbypass権限を再確認してください。
+Summaryの作成・編集と `ci-pr` の完了を契機に評価します。CIの成否は追加の承認条件にしません。このリポジトリには現在 `ci-pr` がないため、Summaryのイベントが実際の起動経路です。Summaryの更新後に👍が付く場合に備え、同じ2条件を30秒ごとに最大6回再確認します。👍の追加自体は起動イベントではないため、待機終了後は別のSummary更新などの起動イベントが必要です。PR単位で実行を直列化しますが、条件を満たすイベントが重なれば承認を複数回送信することがあります。
+
+マージ可否、必要な承認数、古い承認の失効、必須チェック、base同期、スレッド解決はGitHubの保護設定が担います。2026-11-01に読み取った [default Ruleset](https://github.com/daiksud/elite-miko-engineer/rules/26024001) は `main` に有効で、承認1件、スレッド解決、`dismiss_stale_reviews_on_push: true` を要求していました。ただし `required_status_checks` のルールはなく、このRulesetからbaseの最新化を要求しているとは確認できません。classicなbranch protectionは403で未確認であり、ほかの保護が存在しないとも断定しません。設定は変更せず、workflow側で黙って補いません。
+
+GitHubの[承認失効](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-pull-request-reviews-before-merging)は承認済み差分やmerge baseの変化に関係し、すべてのSHA変更・main更新で必ず起きるという意味ではありません。完了済みSummaryと既存の👍を使ってコード・base変更後に新しい承認を発行できるため、承認自体は現在の差分がレビューされた証明にはなりません。これは2条件に絞った方針の制約です。workflowは承認の取り消しやマージを行わず、APIの失敗は実行の失敗として報告します。
