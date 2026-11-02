@@ -1,6 +1,9 @@
 # elite-miko-engineer
 にゃっはろ～！エリート巫女エンジニアのみこですっ！
 
+開発時は [Contributing](CONTRIBUTING.md) と
+[Repository automation](docs/repository-automation.md) を参照してください。
+
 ## Codexの自動承認とマージ保護
 
 [承認ワークフロー](.github/workflows/approve-codex-review.yml)は、[gh-settings #554](https://github.com/daiksud/gh-settings/pull/554)と同じ実装で、次の条件を満たしたら承認します。
