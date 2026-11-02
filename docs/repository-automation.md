@@ -59,9 +59,8 @@ Run `actionlint` for workflow edits and parse changed YAML. Validate proposed
 PR messages with the same PRLint tools:
 
 ```sh
-commitlint_path=$(mise exec npm:@commitlint/cli -- which commitlint)
 printf '%s\n\n%s\n' "$PR_TITLE" "$PR_BODY" |
-  mise exec bun npm:@commitlint/cli -- bun run --bun --no-install "$commitlint_path" --strict
+  mise exec node@26.11.1 npm:@commitlint/cli@21.2.4 -- commitlint --strict
 ```
 
 Review the documentation-only and mixed-file cases against Labeler's rule.

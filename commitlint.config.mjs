@@ -1,7 +1,7 @@
 import { realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
-// The preset lives with the commitlint CLI installed by mise, not in the checkout.
+// Resolve the conventional preset from the CLI installed by mise.
 const require = createRequire(realpathSync(process.argv[1]));
 
 export default {
