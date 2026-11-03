@@ -16,6 +16,13 @@ rule stops matching. Other labels are outside its configuration. It reads
 trusted base-branch configuration and does not check out or execute PR code
 in its write-capable `pull_request_target` job.
 
+The Action is pinned to the untagged upstream fix
+[actions/labeler#957](https://github.com/actions/labeler/pull/957) after v7.0.0.
+It adds and removes configured labels selectively instead of replacing the
+entire label set, preserving unrelated labels added or removed concurrently
+by users or other automation. Additions and removals are separate API requests,
+so synchronization is not atomic.
+
 Issue Forms assign `bug` or `enhancement`. This repository currently has no
 Dependabot configuration. If introduced, omit explicit `labels` overrides so
 Dependabot can use its defaults. Labels do not classify release notes; the
